@@ -1,0 +1,73 @@
+name: Compilar app (Mac + Windows)
+
+# Compila la app de escritorio para macOS y Windows.
+# Se dispara solo al crear un tag (ej. v0.1.0) o a mano desde la pestaña
+# "Actions" de GitHub (Run workflow). Los instaladores quedan como
+# "Artifacts" al final de cada corrida, listos para descargar.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            triple: aarch64-apple-darwin
+          - os: windows-latest
+            triple: x86_64-pc-windows-msvc
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.triple }}
+
+      - name: Instalar dependencias de la UI
+        run: npm install
+
+      - name: Congelar el sidecar Python (PyInstaller)
+        working-directory: sidecar
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+          pyinstaller --onefile --name ronda-sidecar --clean --noconfirm lanzador.py
+
+      - name: Ubicar el binario del sidecar (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p src-tauri/binaries
+          cp sidecar/dist/ronda-sidecar "src-tauri/binaries/ronda-sidecar-${{ matrix.triple }}"
+
+      - name: Ubicar el binario del sidecar (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          New-Item -ItemType Directory -Force -Path src-tauri/binaries
+          Copy-Item sidecar/dist/ronda-sidecar.exe "src-tauri/binaries/ronda-sidecar-${{ matrix.triple }}.exe"
+
+      - name: Compilar la app nativa (Tauri)
+        run: npm run tauri build
+
+      - name: Subir instaladores
+        uses: actions/upload-artifact@v4
+        with:
+          name: ronda-de-ideas-${{ matrix.os }}
+          path: |
+            src-tauri/target/release/bundle/dmg/*.dmg
+            src-tauri/target/release/bundle/nsis/*.exe
+            src-tauri/target/release/bundle/msi/*.msi
+          if-no-files-found: ignore

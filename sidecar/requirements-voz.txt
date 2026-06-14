@@ -1,0 +1,3 @@
+# Dependencia opcional para la transcripción de voz (micrófono).
+# Pesa varios GB porque instala PyTorch. Necesita Python 3.10+ y ffmpeg.
+openai-whisper

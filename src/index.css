@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  /* Acento azul pastel / lavanda (tarjeta destacada del pipeline) */
+  --color-accent: #becfee;
+  --color-accent-deep: #a6bbe6;
+  /* Tinta oscura para texto sobre el acento */
+  --color-ink: #16181d;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-zinc-950 text-zinc-100 antialiased;
+    font-family:
+      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+      Arial, sans-serif;
+  }
+}
+
+/* ---- Sliders minimalistas ---- */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--color-zinc-800);
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  border: 2px solid var(--color-zinc-950);
+  box-shadow: 0 0 0 1px var(--color-zinc-700);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  border: 2px solid var(--color-zinc-950);
+}
+
+/* ---- Scroll fino para el panel del debate ---- */
+.scroll-slim::-webkit-scrollbar {
+  width: 6px;
+}
+.scroll-slim::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-slim::-webkit-scrollbar-thumb {
+  background: var(--color-zinc-800);
+  border-radius: 9999px;
+}
+
+/* ---- Diagramas Mermaid ---- */
+.vista-mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
